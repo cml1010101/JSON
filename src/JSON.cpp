@@ -43,6 +43,7 @@ std::vector<JSONNode> JSONNode::getProperty<std::vector<JSONNode>>(std::string p
 istream& operator>>(istream& in, JSONNode& node)
 {
     bool inList = false, first = true, inString = false, inKey = true, inInt = false;
+    char lastC = 0;
     string currentProperty = "", currentValueString = "";
     int currentInt = 0;
     while (true)
@@ -50,7 +51,7 @@ istream& operator>>(istream& in, JSONNode& node)
         char c = in.get();
         if (inString)
         {
-            if (c == '\"')
+            if (c == '\"' && lastC != '\\')
             {
                 inString = false;
                 if (!inKey)
@@ -188,6 +189,7 @@ istream& operator>>(istream& in, JSONNode& node)
             }
             break;
         }
+        lastC = c;
         first = false;
     }
     return in;
