@@ -123,6 +123,7 @@ ostream& operator<<(ostream& out, JSONNode node)
         first = false;
     }
     out << '}';
+    return out;
 }
 istream& operator>>(istream& in, JSONNode& node)
 {
