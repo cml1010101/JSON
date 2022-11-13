@@ -1,0 +1,5 @@
+Package: libjson
+Version: 1.0
+Architecture: amd64
+Maintainer: cml1010101
+Description: A simple JSON library
