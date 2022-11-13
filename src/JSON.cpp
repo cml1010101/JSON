@@ -40,6 +40,90 @@ std::vector<JSONNode> JSONNode::getProperty<std::vector<JSONNode>>(std::string p
 {
     return nodeLists[propertyName];
 }
+template<>
+void JSONNode::setProperty<int>(std::string propertyName, int i)
+{
+    ints[propertyName] = i;
+}
+template<>
+void JSONNode::setProperty<string>(std::string propertyName, string i)
+{
+    strings[propertyName] = i;
+}
+template<>
+void JSONNode::setProperty<JSONNode>(std::string propertyName, JSONNode i)
+{
+    nodes[propertyName] = i;
+}
+ostream& operator<<(ostream& out, JSONNode node)
+{
+    out << '{';
+    bool first = true;
+    for (auto item : node.strings)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":\"";
+        out << item.second << '\"';
+        first = false;
+    }
+    for (auto item : node.ints)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":";
+        out << item.second;
+        first = false;
+    }
+    for (auto item : node.nodes)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":";
+        out << item.second;
+        first = false;
+    }
+    for (auto item : node.stringLists)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":[";
+        for (size_t i = 0; i < item.second.size(); i++)
+        {
+            out << "\"" << item.second[i] << "\"";
+            if (i != (item.second.size() - 1)) out << ",";
+        }
+        out << "]";
+        first = false;
+    }
+    for (auto item : node.intLists)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":[";
+        for (size_t i = 0; i < item.second.size(); i++)
+        {
+            out << item.second[i];
+            if (i != (item.second.size() - 1)) out << ",";
+        }
+        out << "]";
+        first = false;
+    }
+    for (auto item : node.nodeLists)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":[";
+        for (size_t i = 0; i < item.second.size(); i++)
+        {
+            out << item.second[i];
+            if (i != (item.second.size() - 1)) out << ",";
+        }
+        out << "]";
+        first = false;
+    }
+    out << '}';
+}
 istream& operator>>(istream& in, JSONNode& node)
 {
     bool inList = false, first = true, inString = false, inKey = true, inInt = false;

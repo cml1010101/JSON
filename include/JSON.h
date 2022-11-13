@@ -16,6 +16,9 @@ public:
     JSONNode();
     template<class T>
     T getProperty(std::string propertyName);
+    template<class T>
+    void setProperty(std::string propertyName, T t);
     friend std::istream& operator>>(std::istream& in, JSONNode& info);
+    friend std::ostream& operator<<(std::ostream& out, JSONNode info);
 };
 #endif
