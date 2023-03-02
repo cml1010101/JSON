@@ -9,9 +9,11 @@ private:
     std::map<std::string, JSONNode> nodes;
     std::map<std::string, std::string> strings;
     std::map<std::string, int> ints;
+    std::map<std::string, bool> bools;
     std::map<std::string, std::vector<JSONNode>> nodeLists;
     std::map<std::string, std::vector<std::string>> stringLists;
     std::map<std::string, std::vector<int>> intLists;
+    std::map<std::string, std::vector<bool>> boolLists;
 public:
     JSONNode();
     template<class T>

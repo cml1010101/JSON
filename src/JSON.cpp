@@ -26,6 +26,11 @@ JSONNode JSONNode::getProperty<JSONNode>(std::string propertyName)
     return nodes[propertyName];
 }
 template<>
+bool JSONNode::getProperty<bool>(std::string propertyName) 
+{
+    return bools[propertyName];
+}
+template<>
 std::vector<std::string> JSONNode::getProperty<std::vector<std::string>>(std::string propertyName) 
 {
     return stringLists[propertyName];
@@ -41,6 +46,11 @@ std::vector<JSONNode> JSONNode::getProperty<std::vector<JSONNode>>(std::string p
     return nodeLists[propertyName];
 }
 template<>
+std::vector<bool> JSONNode::getProperty<std::vector<bool>>(std::string propertyName) 
+{
+    return boolLists[propertyName];
+}
+template<>
 void JSONNode::setProperty<int>(std::string propertyName, int i)
 {
     ints[propertyName] = i;
@@ -54,6 +64,11 @@ template<>
 void JSONNode::setProperty<JSONNode>(std::string propertyName, JSONNode i)
 {
     nodes[propertyName] = i;
+}
+template<>
+void JSONNode::setProperty<bool>(std::string propertyName, bool i)
+{
+    bools[propertyName] = i;
 }
 ostream& operator<<(ostream& out, JSONNode node)
 {
@@ -80,6 +95,14 @@ ostream& operator<<(ostream& out, JSONNode node)
         if (!first) out << ',';
         out << '\"';
         out << item.first << "\":";
+        out << item.second;
+        first = false;
+    }
+    for (auto item : node.bools)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << boolalpha << item.first << "\":";
         out << item.second;
         first = false;
     }
@@ -122,12 +145,26 @@ ostream& operator<<(ostream& out, JSONNode node)
         out << "]";
         first = false;
     }
+    for (auto item : node.boolLists)
+    {
+        if (!first) out << ',';
+        out << '\"';
+        out << item.first << "\":[";
+        for (size_t i = 0; i < item.second.size(); i++)
+        {
+            out << boolalpha << item.second[i];
+            if (i != (item.second.size() - 1)) out << ",";
+        }
+        out << "]";
+        first = false;
+    }
     out << '}';
     return out;
 }
 istream& operator>>(istream& in, JSONNode& node)
 {
-    bool inList = false, first = true, inString = false, inKey = true, inInt = false;
+    bool inList = false, first = true, inString = false, inKey = true, inInt = false, inBool = false;
+    bool currentBool = false;
     char lastC = 0;
     string currentProperty = "", currentValueString = "";
     int currentInt = 0;
@@ -187,7 +224,15 @@ istream& operator>>(istream& in, JSONNode& node)
                     }
                     node.intLists[currentProperty].emplace_back(currentInt);
                 }
+                else if (inBool)
+                {
+                    if (node.boolLists.find(currentProperty) == node.boolLists.end())
+                    {
+                        node.boolLists[currentProperty].push_back(currentBool);
+                    }
+                }
                 currentInt = 0;
+                currentBool = false;
             }
             else
             {
@@ -196,7 +241,12 @@ istream& operator>>(istream& in, JSONNode& node)
                 {
                     node.ints[currentProperty] = currentInt;
                 }
+                if (inBool)
+                {
+                    node.bools[currentProperty] = currentBool;
+                }
                 inInt = false;
+                inBool = false;
                 currentProperty = "";
                 currentValueString = "";
                 currentInt = 0;
@@ -237,6 +287,16 @@ istream& operator>>(istream& in, JSONNode& node)
                 }
                 node.intLists[currentProperty].emplace_back(currentInt);
             }
+            if (inBool)
+            {
+                if (node.boolLists.find(currentProperty) == node.boolLists.end())
+                {
+                    node.boolLists.emplace(
+                        std::pair<std::string, std::vector<bool>>(currentProperty, {})
+                    );
+                }
+                node.boolLists[currentProperty].push_back(currentBool);
+            }
             inList = false;
         }
         else if (c == '\"')
@@ -273,6 +333,16 @@ istream& operator>>(istream& in, JSONNode& node)
                 currentInt = 0;
             }
             break;
+        }
+        else if (c == 't')
+        {
+            inBool = true;
+            currentBool = true;
+        }
+        else if (c == 'f')
+        {
+            inBool = true;
+            currentBool = false;
         }
         lastC = c;
         first = false;

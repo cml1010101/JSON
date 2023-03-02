@@ -2,3 +2,5 @@
 *.json
 *.a
 *.deb
+test.cpp
+test
